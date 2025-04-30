@@ -1,0 +1,41 @@
+from pyspark.sql import functions as f
+from pyspark.sql.types import *
+
+silverContainer = "/mnt/silverlayer/"
+schema = "dbo"
+silverCompletePath = f"{silverContainer}/{schema}"
+pathToSilver_user = f"{silverCompletePath}/Users"
+
+dfUsers = spark.read.format("delta")\
+          .load(pathToSilver_user)
+
+columns = dfUsers.columns
+for col in columns:
+    if "date" in col.lower():
+        dfUsers = dfUsers.withColumn(col, f.to_date(dfUsers[col], "yyyy-MM-dd"))
+display(dfUsers)
+
+silverContainer = "/mnt/silverlayer/"
+schema = "dbo"
+silverCompletePath = f"{silverContainer}/{schema}"
+
+goldContainer = "/mnt/goldlayer/"
+goldCompletePath = f"{goldContainer}/{schema}"
+
+table_name = []
+for i in dbutils.fs.ls(silverCompletePath):
+    table_name.append(i.name.split("/")[0])
+
+table_name
+
+
+for i in table_name:
+    pathToSilver = f"{silverCompletePath}/{i}"
+    df = spark.read.format("delta").load(pathToSilver)
+    columns = df.columns
+    for col in columns:
+        if "date" in col.lower():
+            df = df.withColumn(col, f.to_date(df[col], "yyyy-MM-dd"))   
+    outputPath = f"{goldCompletePath}/{i}"
+    print(outputPath)
+    df.write.format("delta").mode("overwrite").save(outputPath)

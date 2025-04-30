@@ -1,0 +1,142 @@
+from pyspark.sql import functions as f
+from pyspark.sql.types import *
+
+## Getting data from users::
+
+dfUsers = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/Users")
+## ------------------------------------------------
+dfComments = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/Comments")
+## ------------------------------------------------
+dfLinkTypes = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/LinkTypes")
+## ------------------------------------------------
+dfPostLinks = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/PostLinks")
+## ------------------------------------------------
+dfPosts = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/Posts")
+## ------------------------------------------------
+dfPostTypes = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/PostTypes")
+## ------------------------------------------------
+dfVotes = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/Votes")
+## ------------------------------------------------
+dfVoteTypes = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/VoteTypes")
+## ------------------------------------------------
+dfBadges = spark.read.format("parquet")\
+          .option("header",True)\
+          .option("inferSchema",True)\
+          .load("/mnt/bronzelayer/Badges")
+## ------------------------------------------------
+dfUsersTransformed = dfUsers.withColumn("AboutMe", f.regexp_replace(f.col("AboutMe"), r'<.*?>|\\n', ''))\
+                            .withColumn("AboutMe", f.when(f.col("AboutMe") == '', None).otherwise(f.col("AboutMe")))\
+                            .filter(f.col("id") > 0) \
+                            .drop('Age','EmailHash')
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/Users'
+fullPath_Users = silverContainer + 'dbo' + directoryName
+
+dfUsersTransformed.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath_Users)\
+                        .save()
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/Comments'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfComments.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/LinkTypes'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfLinkTypes.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/PostLinks'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfPostLinks.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/Posts'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfPosts.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/PostTypes'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfPostTypes.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/Votes'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfVotes.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/VoteTypes'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfVoteTypes.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------
+silverContainer = '/mnt/silverlayer/'
+directoryName = '/Badges'
+fullPath = silverContainer + 'dbo' + directoryName
+
+dfBadges.write.format("delta")\
+                        .mode("overwrite")\
+                        .option("path",fullPath)\
+                        .save()
+## ---------------------------------------------

@@ -1,0 +1,41 @@
+from pyspark.sql import functions as f
+from pyspark.sql.types import *
+
+spark.conf.set("fs.azure.account.auth.type.StorageAccount.dfs.core.windows.net", "OAuth")
+spark.conf.set("fs.azure.account.oauth.provider.type.StorageAccount.dfs.core.windows.net", "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider")
+spark.conf.set("fs.azure.account.oauth2.client.id.StorageAccount.dfs.core.windows.net", "<appid>")
+spark.conf.set("fs.azure.account.oauth2.client.secret.StorageAccount.dfs.core.windows.net", "<value>")
+spark.conf.set("fs.azure.account.oauth2.client.endpoint.StorageAccount.dfs.core.windows.net", "https://login.microsoftonline.com/<tenantId>/oauth2/token")
+
+## Just to check the connectivity
+dbutils.fs.ls("abfss://containerName@StorageAccount.dfs.core.windows.net/")
+
+## Mounting notebook to Bronze Container:
+
+dbutils.fs.mount(
+  source = "wasbs://bronze@containerName.blob.core.windows.net",
+  mount_point = "/mnt/bronzelayer",
+  extra_configs = {
+    "fs.azure.account.key.StorageAccount.blob.core.windows.net": "<SecretFromADLS>"
+  }
+)
+
+##Silver
+
+dbutils.fs.mount(
+  source = "wasbs://silver@containerName.blob.core.windows.net",
+  mount_point = "/mnt/silverlayer",
+  extra_configs = {
+    "fs.azure.account.key.StorageAccount.blob.core.windows.net": "<SecretFromADLS>"
+  }
+)
+
+##Gold
+
+dbutils.fs.mount(
+  source = "wasbs://gold@containerName.blob.core.windows.net",
+  mount_point = "/mnt/goldlayer",
+  extra_configs = {
+    "fs.azure.account.key.StorageAccount.blob.core.windows.net": "<SecretFromADLS>"
+  }
+)

@@ -1,0 +1,59 @@
+
+
+
+drop PROCEDURE if EXISTS [dbo].[CreateStackoverflowView]
+GO
+create PROCEDURE [dbo].[CreateStackoverflowView]
+(
+    @Schema [VARCHAR](128),
+    @ViewName [VARCHAR](128)
+)
+AS
+BEGIN
+    DECLARE @sql [VARCHAR](MAX)
+    set @sql = 'drop view if exists ' + @Schema + '.' + @ViewName
+    exec(@sql)
+    --print(@sql)
+    SET @sql = 'create view ' + @Schema + '.' + @ViewName + ' as 
+                select * from OPENROWSET( BULK ''https://ststackoverflowdata001.dfs.core.windows.net/gold/dbo/' + @ViewName + '/'',
+                FORMAT = ''delta'' ) as [result]'
+    --print(@sql)
+    exec(@sql)
+END
+
+exec [dbo].[CreateStackoverflowView] @Schema = 'dbo' , @ViewName = 'Users'
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+-- This is auto-generated code
+SELECT
+    TOP 100 *
+FROM
+    OPENROWSET(
+        BULK 'https://ststackoverflowdata001.dfs.core.windows.net/gold/dbo/Users/',
+        FORMAT = 'DELTA'
+    ) AS [result]
+
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+
+Views:: 
+
+SELECT TOP (100) [Id]
+,[AboutMe]
+,[CreationDate]
+,[DisplayName]
+,[DownVotes]
+,[LastAccessDate]
+,[Location]
+,[Reputation]
+,[UpVotes]
+,[Views]
+,[WebsiteUrl]
+,[AccountId]
+ FROM [dbo].[Users]
